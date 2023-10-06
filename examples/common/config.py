@@ -6,7 +6,8 @@ class Config(object):
 
     MODEL_DIR = "./model/"
 
-    BATCH_SIZE = 32
+    #BATCH_SIZE = 32
+    BATCH_SIZE = 64
 
     TRAIN_DAYS = ['2020-05-10', '2020-05-11']
 

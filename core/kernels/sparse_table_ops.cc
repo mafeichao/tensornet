@@ -199,6 +199,8 @@ public:
                 done);
 
             var_infos.emplace_back(variable, sign_value, out_tensor);
+	    LOG(INFO) << "emb table shape:" << var_tensor->shape().DebugString()
+                << ",sparse matrix shape:" << sign_value->shape().DebugString();
         }
 
         CHECK_GT(var_infos.size(), 0);

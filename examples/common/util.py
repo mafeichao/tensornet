@@ -8,6 +8,8 @@ import numpy as np
 def read_dataset(data_path, days, match_pattern, batch_size, parse_func, num_parallel_calls = 12):
     ds_data_files = tn.data.list_files(data_path, days=days, match_pattern=match_pattern)
     dataset = ds_data_files.shard(num_shards=tn.core.shard_num(), index=tn.core.self_shard_id())
+    for d in dataset:
+        tf.print("input file:", d)
     dataset = dataset.interleave(lambda f: tf.data.TFRecordDataset(f, buffer_size=1024 * 100),
                                        cycle_length=4, block_length=8,
                                        num_parallel_calls=tf.data.experimental.AUTOTUNE)

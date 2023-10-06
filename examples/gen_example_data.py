@@ -2,21 +2,24 @@ import random
 import os
 import tensorflow as tf
 
-def serialize_example(slots, sign_pool):
+def serialize_example(slots, sign_pool, uid):
     fea_desc = {}
 
-    fea_desc["uniq_id"] = tf.train.Feature(bytes_list=tf.train.BytesList(value=[b"xxxxx"]))
-    label = random.choice([1, 1, 0])
+    fea_desc["uniq_id"] = tf.train.Feature(bytes_list=tf.train.BytesList(value=[bytes(uid,'utf8')]))
+    label = random.choice([1, 1, 0, 0, 0])
     fea_desc["label"] = tf.train.Feature(int64_list=tf.train.Int64List(value=[label]))
 
     for slot, slot_len in slots:
         # test default value for not exist feature
         if label == 0 and slot == 4:
+        #if slot == 4:
             continue
 
         p = sign_pool[slot]
         values = []
-        for i in range(slot_len):
+        N = random.randint(1, slot_len)
+        #for i in range(slot_len):
+        for i in range(N):
             values.append(random.choice(p))
 
         fea_desc[slot] = tf.train.Feature(int64_list=tf.train.Int64List(value=values))
@@ -27,7 +30,8 @@ def serialize_example(slots, sign_pool):
 
 def generate_data(dt, name):
     slots = [("1", 1), ("2", 1), ("3", 1), ("4", 3)]
-    count = 12000
+    #count = 12000
+    count = 65
 
     sign_pool = {}
 
@@ -39,7 +43,7 @@ def generate_data(dt, name):
 
     with tf.io.TFRecordWriter("./data/{}/tf-part.{}".format(dt, name)) as writer:
         for i in range(count):
-            example = serialize_example(slots, sign_pool)
+            example = serialize_example(slots, sign_pool, dt+'#'+name+'#'+str(i))
             writer.write(example)
 
 os.makedirs("data/2020-05-10")

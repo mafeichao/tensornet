@@ -88,6 +88,7 @@ class Model(tf.keras.Model):
         # publicly.
         data = data_adapter.expand_1d(data)
         x, y, sample_weight = data_adapter.unpack_x_y_sample_weight(data)
+        #tf.print(x,y,sample_weight)
 
         with backprop.GradientTape() as tape:
             y_pred = self(x, training=True)

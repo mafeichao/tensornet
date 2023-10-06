@@ -21,6 +21,7 @@
 import collections
 import json
 
+import tensorflow as tf
 import tensornet as tn
 from tensornet.core import gen_sparse_table_ops
 
@@ -105,7 +106,8 @@ class StateManagerImpl(fc.StateManager):
                                                 table_handle=self.sparse_table_handle)
 
         assert len(pulled_mapping_values) == len(vars)
-
+        #tf.print("pulled_mapping_values:", pulled_mapping_values)
+        #tf.print("details:", [var.handle for var in vars], [f.values for f in feature_values])
         for var, mapping_value in zip(vars, pulled_mapping_values):
             assert var.ref() in self._var_to_cols_map
 
@@ -124,6 +126,7 @@ class StateManagerImpl(fc.StateManager):
                 continue
 
             assert isinstance(grad, ops.IndexedSlices)
+            tf.print("grad_and_var", grad.indices, var.shape, grad.values)
 
             column_name = self._var_to_cols_map[var.ref()]
 
@@ -136,6 +139,7 @@ class StateManagerImpl(fc.StateManager):
 
             grads.append(grad.values)
             feature_values.append(sparse_feature.values)
+            tf.print("feature", sparse_feature.values)
 
         # grads and feature_values must not empty
         assert grads and feature_values
@@ -219,7 +223,17 @@ class EmbeddingFeatures(Layer):
 
         self.sparse_pulling_features = self.get_sparse_pulling_feature(using_features)
 
+        #for k, v in self.sparse_pulling_features.items():
+        #    tf.print("pulling_features:", k, v)
+        
         pulled_mapping_values = self._state_manager.pull(self.sparse_pulling_features)
+
+        with ops.control_dependencies(list(pulled_mapping_values.values())):
+            for k, v in using_features.items():
+                tf.print("using_features:", k, v, self.name)
+
+            for k, v in pulled_mapping_values.items():
+                tf.print("mapping_features:", k, v, len(v), self.name)
 
         output_tensors = []
         for column in self._feature_columns:
@@ -237,6 +251,8 @@ class EmbeddingFeatures(Layer):
                 cols_to_output_tensors[column] = processed_tensors
 
             output_tensors.append(processed_tensors)
+            #print("colunmn:", column.categorical_column.name)
+            #print("tensors:", processed_tensors)
 
         if self.is_concat:
             return self._verify_and_concat_tensors(output_tensors)
@@ -245,7 +261,6 @@ class EmbeddingFeatures(Layer):
 
     def backwards(self, grads_and_vars):
         assert self.sparse_pulling_features
-
         return self._state_manager.push(grads_and_vars, self.sparse_pulling_features)
 
     def filter_not_used_features(self, features):

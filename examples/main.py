@@ -23,6 +23,7 @@ def parse_line_batch(example_proto):
 
     feature_dict = tf.io.parse_example(example_proto, fea_desc)
     label = feature_dict.pop('label')
+    #tf.print("example", feature_dict, label)
     return feature_dict, label
 
 def create_model():

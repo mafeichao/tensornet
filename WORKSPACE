@@ -29,8 +29,8 @@ http_archive(
     urls = [
     "https://github.com/apache/incubator-brpc/archive/0.9.7.tar.gz"
     ],
-    sha256 = "722cd342baf3b05189ca78ecf6c56ea6ffec22e62fc2938335e4e5bab545a49c",
-    strip_prefix = "incubator-brpc-0.9.7",
+    sha256 = "71088f673c197a6b760a20ac6b07f481cc4a0b08917f35acbf325de01b3f3fe7",
+    strip_prefix = "brpc-0.9.7",
 )
 
 # depend by brpc
